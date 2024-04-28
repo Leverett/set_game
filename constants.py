@@ -4,3 +4,5 @@ STANDARD_FIELD_SIZE = 12
 
 default_id = "id1"
 default_name = "leverett"
+
+GAME_OVER = "Game Over"

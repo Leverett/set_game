@@ -3,6 +3,7 @@ from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.image import Image
+from kivy.uix.popup import Popup
 from kivy.clock import Clock
 from kivy.lang import Builder
 from management import *
@@ -72,6 +73,11 @@ class SetGame(BoxLayout):
     def make_game_stats_display(self) -> BoxLayout:
         pass
 
+    def game_over(self):
+        game_over_label = Label(text=GAME_OVER, color=(1, 1, 1, 1), size_hint=(1, None), height=50)
+        popup = Popup(title='Set Game', content=game_over_label, size_hint=(None, None), size=(300, 100))
+        popup.open()
+
 
 class SPGame(SetGame):
     def __init__(self):
@@ -83,9 +89,12 @@ class SPGame(SetGame):
         self.selected_cards.clear()
         self.reset_card_opacity()
         if len(events) > 0:
-            self.game_state.process_event(events[0])
+            event = events[0]
+            self.game_state.process_event(event)
             self.display_cards()
             self.update_game_stats()
+            if type(event) is ValidSetEvent and event.game_over:
+                self.game_over()
 
     def do_add_cards_action(self, action):
         events = self.manager.handle_action(action)

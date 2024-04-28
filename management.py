@@ -10,11 +10,11 @@ is_debug = False
 
 def is_feature_valid(value1, value2, value3):
     if value1 == value2 == value3:
-        return True  # All values are equal
+        return True
     elif value1 != value2 and value2 != value3 and value1 != value3:
-        return True  # All values are different
+        return True
     else:
-        return False  # Neither all equal nor all different
+        return False
 
 def is_set(card1, card2, card3):
     if is_debug:
@@ -107,12 +107,12 @@ class LocalGameManager(SetGameManager):
         
         if is_set(*list(cards)):
             self.game_state.round_missed_sets = defaultdict(set)
-            num_draws = 0
             try:
                 num_draws = self.get_num_draws(cards)
+                return ValidSetEvent(set_action, len(self.events), cards, num_draws)
             except GameOverException:
-                num_draws = -1
-            return ValidSetEvent(set_action, len(self.events), cards, num_draws, game_over=(num_draws >= 0))
+                return ValidSetEvent(set_action, len(self.events), cards, 0, game_over=True)
+            
 
         player_id = set_action.player_id
         if self.rules.punish_missed_sets:

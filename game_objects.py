@@ -135,9 +135,12 @@ class SetGameState:
     def process_valid_set_event(self, event):
         cards = event.cards
         self.players[event.player_id].sets.append(event.cards)
-        for card in cards:
-            self.replace_card(card)
-        self.do_draws(event.num_draws)
+        if event.game_over:
+            self.displayed_cards = [card for card in self.displayed_cards if card not in cards]
+        else:
+            for card in cards:
+                self.replace_card(card)
+            self.do_draws(event.num_draws)
     
     def process_invalid_set_event(self, event):
         self.players[event.player_id].missed_sets += 1
@@ -157,12 +160,11 @@ class SetGameState:
             self.displayed_cards.append(self.get_next_card())
 
     def replace_card(self, card):
-        if self.deck:
+        if self.can_draw():
             next_card = self.get_next_card()
             self.displayed_cards = [next_card if c == card else c for c in self.displayed_cards]
-            return True
         else:
-            return False
+            self.displayed_cards = [c for c in self.displayed_cards if c != card]
         
     def run_game_over(self):
         pass
