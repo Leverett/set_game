@@ -1,3 +1,8 @@
+# Custom
+backup_stuff
+converter.py
+scratch.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -127,6 +132,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+kivy_venv
 
 # Spyder project settings
 .spyderproject
