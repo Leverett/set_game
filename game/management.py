@@ -10,36 +10,7 @@ def init_deck():
     while True:
         shuffle(deck)
         if contains_set(deck[:STANDARD_FIELD_SIZE]):
-            return deck[:15]
-
-
-class SetLobby:
-    def __init__(self, player_id, player_name):
-        self.players = []
-        self.add_player(player_id, player_name)
-        self.rules = Rules(True, True, False)
-        self.started = False
-
-    def add_player(self, player_id, player_name):
-        if len(self.players) < MAX_PLAYERS:
-            self.players.append(Player(player_id, player_name))
-
-    def remove_player(self, player_id):
-        if self.is_host(player_id):
-            return False
-        self.players = [player for player in self.players if player.id != player_id]
-        return True
-
-    def is_host(self, player_id):
-        return player_id == self.players[0]
-    
-    def get_host(self):
-        return self.players[0]
-
-    def make_game(self):
-        self.started = True
-        return SetGameState(self.players, self.punish_missed_sets, self.punish_missed_empties)
-
+            return deck
 
 class SetGameManager:
     def handle_action(self, action):

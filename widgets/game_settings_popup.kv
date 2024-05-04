@@ -1,0 +1,68 @@
+#:kivy 2.3.0
+#:import constants game.constants
+
+<LabeledCheckBox>:
+    orientation: 'horizontal'
+    size_hint: 1, 0.2
+    pos_hint: {'center_x': 0.5}
+    Label:
+        id: label
+        text: root.text
+        size_hint_x: 0.8
+        halign: 'left'
+        text_size: self.size
+        valign: 'middle'
+        padding_x: dp(10)
+
+    CheckBox:
+        id: checkbox
+        size_hint_x: None
+        size_hint_x: 0.2
+        width: dp(30)
+        valign: 'middle'
+        pos_hint: {'right': 1}
+
+<GameSettings>:
+    orientation: 'vertical'
+    spacing: 5
+    padding: 5
+    game_mode: constants.CONFIG_SP_RULES
+
+    LabeledCheckBox:
+        id: punish_missed_sets
+        text: "Punish Missed Sets"
+    LabeledCheckBox:
+        id:  punish_missed_empties
+        text: "Punish Missed Empties"
+    LabeledCheckBox:
+        id:  enable_hints
+        text: "Enable Hints"
+    LabeledCheckBox:
+        id:  endless_mode
+        text: "Endless Mode"
+    
+
+<GameSettingsPopup>:
+    size_hint: None, None
+    size: 600, 400
+    title: "Game Settings"
+    title_align: "center"
+    title_size: '24sp'
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        GameSettings:
+            size_hint: (1, 0.8)
+            
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, 0.2
+
+            Button:
+                text: 'Cancel'
+                on_press: root.dismiss()
+
+            Button:
+                text: 'Start Game'
+                on_press: root.start_game()

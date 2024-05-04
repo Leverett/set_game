@@ -1,0 +1,19 @@
+#:kivy 2.3.0
+
+<SetGame>:
+    orientation: 'vertical'
+
+    BoxLayout:
+        size_hint_y: None
+        height: '10dp'
+
+    GridLayout:
+        id: card_grid
+        cols: 3
+        spacing: 10
+
+    BoxLayout:
+        id: buttons_layout
+        orientation: 'horizontal'
+        height: '64dp'
+        size_hint_y: None

@@ -1,0 +1,30 @@
+#:kivy 2.3.0
+
+<HomeScreen>:
+    orientation: 'vertical'
+    
+    Label:
+        text: 'The Game of Set'
+        font_size: '40sp'
+        size_hint_y: None
+        height: 100
+        
+    Label:
+        text: 'by Leverett'
+        font_size: '20sp'
+        size_hint_y: None
+        height: 50
+        
+    BoxLayout:
+        orientation: 'horizontal'
+        spacing: 20
+        size_hint_y: None
+        height: 100
+        
+        Button:
+            text: 'Multiplayer (coming soon)'
+        Button:
+            text: 'Solitaire'
+            on_press: root.start_sp_press()
+        Button:
+            text: 'Default Settings'

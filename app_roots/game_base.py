@@ -9,7 +9,7 @@ from widgets.game_stats_display import *
 from widgets.grid_display import *
 
 
-Builder.load_file('set_game.kv')
+Builder.load_file('layouts/set_game.kv')
 
 class SetGame(BoxLayout):
     def __init__(self, manager, game_state, player_id, **kwargs):

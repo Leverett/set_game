@@ -94,10 +94,24 @@ class Player:
         return self.missed_sets + self.missed_empties
 
 class Rules:
-    def __init__(self, punish_missed_sets, punish_missed_empties, enable_hints):
+    def __init__(self, punish_missed_sets, punish_missed_empties, enable_hints, endless_mode):
         self.punish_missed_sets = punish_missed_sets
         self.punish_missed_empties = punish_missed_empties
         self.enable_hints = enable_hints
+        self.endless_mode = endless_mode
+
+    def default_rules():
+        return Rules(True, True, False, False)
+
+    def to_dict(self):
+        return {rule: getattr(self, rule) for rule in RULES}
+        
+    @classmethod
+    def from_dict(cls, data):
+        instance = cls()
+        for key, value in data.items():
+            setattr(instance, key, value)
+        return instance
 
 class MissingEventException(Exception):
     def __init__(self, event_index, current_num_events):

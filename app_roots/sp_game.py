@@ -4,9 +4,13 @@ from app_roots.game_base import *
 
 
 class SPGame(SetGame):
-    def __init__(self):
-        manager = LocalGameManager(None, {default_id: Player(default_id, default_name)})
+    def __init__(self, rules):
+        print("SPGame init")
+        manager = LocalGameManager(rules, {default_id: Player(default_id, default_name)})
         super().__init__(manager, deepcopy(manager.game_state), player_id=default_id)
+
+    def refresh(self):
+        pass
 
     def do_set_action(self, action):
         events = self.manager.handle_action(action)
