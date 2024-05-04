@@ -14,16 +14,8 @@ class GameSettingsPopup(Popup):
         super().__init__(**kwargs)
         self.app = App.get_running_app()
 
-    def get_rule(self, rule):
-        return self.app.config[CONFIG_SP_RULES][rule].lower() in ['true', 'yes', '1']
-    
-    def make_rules(self):
-        return Rules(self.get_rule(PUNISH_MISSED_SETS), self.get_rule(PUNISH_MISSED_EMPTIES), self.get_rule(ENABLE_HINTS), self.get_rule(ENDLESS_MODE))
-
     def start_game(self):
-        rules = Rules(self.get_rule(PUNISH_MISSED_SETS), self.get_rule(PUNISH_MISSED_EMPTIES), self.get_rule(ENABLE_HINTS), self.get_rule(ENDLESS_MODE))
-        print(f"Rules: {rules}")
-        self.app.switch_root(SPGame(rules))
+        self.app.start_game(CONFIG_SP_RULES)
         self.dismiss()
 
 

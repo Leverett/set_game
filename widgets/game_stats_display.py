@@ -15,8 +15,8 @@ def missed_sets_text(n):
 def missed_empties_text(n):
     return f"Missed Empties: {n}"
 
-def remaining_cards_text(n):
-    return f"Remaining Cards: {n}"
+def remaining_deals_text(n):
+    return f"Remaining Deals: {n // 3}"
 
 class GameStatsDisplay(BoxLayout):
     def __init__(self, **kwargs):
@@ -35,12 +35,12 @@ class SPBasicStatsDisplay(GameStatsDisplay):
         super().__init__()
         self.sets_found_label = Label(text=sets_found_text(0))
         self.add_widget(self.sets_found_label)
-        self.remaining_cards_label = Label(text=remaining_cards_text(len(ALL_CARDS)))
-        self.add_widget(self.remaining_cards_label)
+        self.remaining_deals_label = Label(text=remaining_deals_text(len(ALL_CARDS)))
+        self.add_widget(self.remaining_deals_label)
 
     def update_game_stats(self, game_state, player) -> None:
         self.sets_found_label.text = sets_found_text(len(player.sets))
-        self.remaining_cards_label.text = remaining_cards_text(game_state.remaining_cards)
+        self.remaining_deals_label.text = remaining_deals_text(game_state.remaining_cards)
 
 class MissesDisplay(BoxLayout):
     def __init__(self):
@@ -92,8 +92,8 @@ class SPScoreStatsDisplay(SPStatsDisplay):
         else:
             self.misses_display = MissedEmptiesDisplay()
         self.add_widget(self.misses_display)
-        self.remaining_cards_label = Label(text=remaining_cards_text(len(ALL_CARDS)))
-        self.add_widget(self.remaining_cards_label)
+        self.remaining_deals_label = Label(text=remaining_deals_text(len(ALL_CARDS)))
+        self.add_widget(self.remaining_deals_label)
 
     def update_game_stats(self, game_state, player) -> None:
         SPBasicStatsDisplay.update_game_stats(self, game_state, player)

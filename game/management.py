@@ -5,15 +5,20 @@ import bisect
 from game.events import *
 from game.game_objects import *
 
+deck_size = 81
+
 def init_deck():
     deck = copy(ALL_CARDS)
     while True:
         shuffle(deck)
         if contains_set(deck[:STANDARD_FIELD_SIZE]):
-            return deck
+            return deck[:deck_size]
 
 class SetGameManager:
     def handle_action(self, action):
+        pass
+
+    def get_events(self, timestamp):
         pass
 
 class LocalGameManager(SetGameManager):
@@ -45,7 +50,7 @@ class LocalGameManager(SetGameManager):
                 self.events.append(event)
                 self.game_state.process_event(event)
             return events
-        return self.later_events(action)
+        return self.get_events(action)
     
     def handle_call_set(self, action):
         cards = action.cards
@@ -93,7 +98,7 @@ class LocalGameManager(SetGameManager):
         self.round_missed_sets = defaultdict(set)
         return self.valid_call_empty_event(action, drawn_cards)
     
-    def later_events(self, player_action):
+    def get_events(self, player_action):
         index = bisect.bisect_left(self.events, player_action, key=lambda event: event.time)
         return self.events[index:]
 

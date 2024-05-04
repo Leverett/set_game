@@ -80,11 +80,10 @@ class GameSettings(BoxLayout):
                 opt.checkbox().bind(active=func)
                 self.bound_funcs[opt.rule] = func
             else:
-                opt.checkbox().unbind(active=self.bound_funcs[opt.rule]) 
-
-    def set_rule(self, rule, value):
-        self.app.config.set(self.game_mode, rule, value)
-        self.app.config.write()
+                opt.checkbox().unbind(active=self.bound_funcs[opt.rule])
 
     def get_rule(self, rule):
-        return self.app.config[self.game_mode][rule].lower() in ['true', 'yes', '1']
+        return self.app.get_rule(rule, self.game_mode)
+
+    def set_rule(self, rule, value):
+        self.app.set_rule(rule, value, self.game_mode)

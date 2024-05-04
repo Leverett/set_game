@@ -1,11 +1,13 @@
 from copy import deepcopy
 from kivy.uix.boxlayout import BoxLayout
 from app_roots.game_base import *
+from kivy.app import App
 
+
+Builder.load_file('widgets/sp_gameover_popup.kv')
 
 class SPGame(SetGame):
     def __init__(self, rules):
-        print("SPGame init")
         manager = LocalGameManager(rules, {default_id: Player(default_id, default_name)})
         super().__init__(manager, deepcopy(manager.game_state), player_id=default_id)
 
@@ -51,3 +53,18 @@ class SPGame(SetGame):
     def make_game_stats_display(self) -> BoxLayout:
         rules = self.manager.rules
         return  SPScoreStatsDisplay(self.manager.rules) if rules.punish_missed_sets or rules.punish_missed_empties else SPBasicStatsDisplay()
+    
+    def game_over(self):
+        GameOverPopup().open()
+
+class GameOverPopup(Popup):
+
+    def new_game(self):
+        App.get_running_app().start_game(CONFIG_SP_RULES)
+        self.dismiss()
+
+    def quit(self):
+        App.get_running_app().go_home()
+        self.dismiss()
+
+    

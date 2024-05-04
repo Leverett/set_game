@@ -93,6 +93,4 @@ class SetGame(BoxLayout):
         pass
 
     def game_over(self):
-        game_over_label = Label(text=GAME_OVER, color=(1, 1, 1, 1), size_hint=(1, None), height=50)
-        popup = Popup(title='Set Game', content=game_over_label, size_hint=(None, None), size=(300, 100))
-        popup.open()
+        pass

@@ -1,7 +1,7 @@
 from kivy.app import App
 import os
 from widgets.game_stats_display import *
-from app_roots.home import HomeScreen
+from app_roots.home import HomeScreen, SPGame
 
 class RootWidget(BoxLayout):
     pass
@@ -12,11 +12,9 @@ class SetApp(App):
         super().__init__(**kwargs)
         
     def update_config(self):
-        print("update_config")
         self.config.write()
 
     def get_config(self):
-        print("get_config")
         return self.config
 
     def build(self):
@@ -28,9 +26,29 @@ class SetApp(App):
         root.add_widget(HomeScreen())
         return root
     
-    def switch_root(self, new_root, **kwargs):
+    def switch_root(self, new_root):
         self.root.clear_widgets()
         self.root.add_widget(new_root)
+
+    def get_rule(self, rule, game_mode):
+        return self.config[game_mode][rule].lower() in ['true', 'yes', '1']
+
+    def set_rule(self, rule, value, game_mode):
+        self.config.set(game_mode, rule, value)
+        self.config.write()
+
+    def make_rules(self, game_mode):
+        return Rules(self.get_rule(PUNISH_MISSED_SETS, game_mode),
+                     self.get_rule(PUNISH_MISSED_EMPTIES, game_mode),
+                     self.get_rule(ENABLE_HINTS, game_mode),
+                     self.get_rule(ENDLESS_MODE, game_mode))
+
+    def start_game(self, game_mode):
+        rules = self.make_rules(game_mode)
+        self.switch_root(SPGame(rules))
+
+    def go_home(self):
+        self.switch_root(HomeScreen())
 
 
 
