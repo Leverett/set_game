@@ -1,7 +1,7 @@
 
 runtime: python312
 instance_class: F1
-service: GameManager
+service: game_manager
 # runtime_config:
 #   operating_system: "ubuntu22"
 #   runtime_version: "3.12"
