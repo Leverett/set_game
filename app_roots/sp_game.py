@@ -1,7 +1,7 @@
 from copy import deepcopy
-from kivy.uix.boxlayout import BoxLayout
 from app_roots.game_base import *
 from kivy.app import App
+from widgets.sp.game_stats_widgets import *
 
 
 Builder.load_file('widgets/sp/gameover_popup.kv')
@@ -50,9 +50,14 @@ class SPGame(SetGame):
             if isinstance(image, HighlightedImage):
                 image.flash_hint()
 
-    def make_game_stats_display(self) -> BoxLayout:
-        rules = self.manager.rules
-        return  SPScoreStatsDisplay(self.manager.rules) if rules.punish_missed_sets or rules.punish_missed_empties else SPBasicStatsDisplay()
+    def make_game_stats_display(self) -> GameStatsDisplay:
+        return SPStatsDisplay(self.manager.rules)
+    
+    def quit(self):
+        App.get_running_app().go_home()
+
+    def title(self):
+        return "Solitaire"
     
     def game_over(self):
         GameOverPopup().open()
@@ -66,5 +71,3 @@ class GameOverPopup(Popup):
     def quit(self):
         App.get_running_app().go_home()
         self.dismiss()
-
-    

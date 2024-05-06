@@ -24,7 +24,7 @@ class SetGame(BoxLayout):
         self.display_cards()
 
         self.stats_display = self.make_game_stats_display()
-        self.add_widget(self.stats_display, index=(self.children.index(self.card_grid)))
+        self.ids.stats_display.add_widget(self.stats_display)
         self.update_game_stats()
 
         self.buttons_layout = self.ids.buttons_layout
@@ -66,6 +66,7 @@ class SetGame(BoxLayout):
             self.add_widget(button_widget_parent)
         return self
 
+    @abstractmethod
     def do_set_action(self):
         pass
 
@@ -76,12 +77,14 @@ class SetGame(BoxLayout):
     def add_cards_press(self, _):
         self.do_add_cards_action(CallEmpty(self.player.id))
 
+    @abstractmethod
     def do_add_cards_action(self):
         pass
 
     def hint_press(self, _):
         self.do_hint()
 
+    @abstractmethod
     def do_hint(self):
         pass
 
@@ -89,8 +92,18 @@ class SetGame(BoxLayout):
         for child in self.ids.card_grid.children:
             child.opacity = 1
 
-    def make_game_stats_display(self) -> BoxLayout:
+    @abstractmethod
+    def make_game_stats_display(self) -> GameStatsDisplay:
         pass
 
+    @abstractmethod
     def game_over(self):
+        pass
+
+    @abstractmethod
+    def title(self):
+        pass
+
+    @abstractmethod
+    def quit(self):
         pass

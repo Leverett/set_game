@@ -174,6 +174,9 @@ class Rules:
         self.enable_hints = enable_hints
         self.endless_mode = endless_mode
 
+    def count_misses(self):
+        return self.punish_missed_sets or self.punish_missed_empties
+
     def default_rules():
         return Rules(True, True, False, False)
 
