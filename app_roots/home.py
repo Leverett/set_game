@@ -15,7 +15,7 @@ class GameSettingsPopup(Popup):
         self.app = App.get_running_app()
 
     def start_game(self):
-        self.app.start_game(CONFIG_SP_RULES)
+        self.app.start_game(GameMode.SINGLE_PLAYER)
         self.dismiss()
 
 

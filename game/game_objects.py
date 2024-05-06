@@ -1,9 +1,10 @@
 from enum import IntEnum, StrEnum
-from random import shuffle
+from random import shuffle, choice
 from game.constants import *
 from collections import defaultdict
 from game.events import *
 from itertools import product, combinations
+from abc import ABC, abstractmethod
 
 
 class Color(StrEnum):
@@ -55,8 +56,6 @@ class Card:
 def card_image_source(card):
     return f"images/{card}.png"
 
-FEATURES = [Color, Symbol, Shading, Number]
-ALL_CARDS = [Card(*features) for features in list(product(*FEATURES))]
 
 def is_feature_valid(value1, value2, value3):
     if value1 == value2 == value3:
@@ -78,6 +77,81 @@ def contains_set(cards):
         if (is_set(*set)):
             return True
     return False
+
+FEATURES = [Color, Symbol, Shading, Number]
+def all_cards():
+    return [Card(*features) for features in list(product(*FEATURES))]
+
+short_game = True
+deck_size = 15
+class Deck(ABC):
+    def __init__(self):
+        self.cards = all_cards()
+        if short_game:
+            shuffle(self.cards)
+            self.cards = self.cards[:deck_size]
+
+    @abstractmethod
+    def draw_cards(self, *args):
+        pass
+    @abstractmethod
+    def remaining_cards(self):
+        pass
+    @abstractmethod
+    def initial_draw(self):
+        pass
+
+class EndlessDeck(Deck):
+
+    def draw_card(self, used_cards):
+        available_cards = [card for card in self.cards if card not in used_cards]
+        if len(available_cards) == 0:
+            self.cards.extend(all_cards())
+            available_cards = [card for card in self.cards if card not in used_cards]
+        new_card = choice(available_cards)
+        self.cards.remove(new_card)
+        return new_card
+        
+    def draw_cards(self, displayed_cards, num=SET_SIZE):
+        used_cards = set(displayed_cards)
+        new_cards = []
+        for _ in range(num):
+            new_card = self.draw_card(used_cards)
+            new_cards.append(new_card)
+            used_cards.add(new_card)
+        return new_cards
+
+    def remaining_cards(self):
+        return -1
+    
+    def initial_draw(self):
+        while True:
+            initial_cards = set()
+            while len(initial_cards) < STANDARD_FIELD_SIZE:
+                initial_cards.add(choice(self.cards))
+            if contains_set(initial_cards):
+                for card in initial_cards:
+                    self.cards.remove(card)
+                return list(initial_cards)
+
+class StandardDeck(Deck):
+
+    def draw_cards(self, displayed_cards, num=SET_SIZE):
+        if len(self.cards) < num:
+            return []
+        new_cards = self.cards[:num]
+        self.cards = self.cards[num:]
+        return new_cards
+    
+    def remaining_cards(self):
+        return len(self.cards)
+    
+    def initial_draw(self):
+        while True:
+            shuffle(self.cards)
+            if contains_set(self.cards[:STANDARD_FIELD_SIZE]):
+                return self.draw_cards([], num=STANDARD_FIELD_SIZE)
+
     
 class Player:
     def __init__(self, id, name):
@@ -104,7 +178,7 @@ class Rules:
         return Rules(True, True, False, False)
 
     def to_dict(self):
-        return {rule: getattr(self, rule) for rule in RULES}
+        return {rule: getattr(self, rule.value) for rule in Rule}
         
     @classmethod
     def from_dict(cls, data):

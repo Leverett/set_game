@@ -32,34 +32,18 @@ class GameSettings(BoxLayout):
 
     def _on_widget_ready(self, dt):
         self.app = App.get_running_app()
-        self.punish_missed_sets_opt = self.ids.punish_missed_sets
-        self.punish_missed_empties_opt = self.ids.punish_missed_empties
-        self.enable_hints_opt = self.ids.enable_hints
-        self.endless_mode_opt = self.ids.endless_mode
-        
-        self.opts = [
-            self.punish_missed_sets_opt,
-            self.punish_missed_empties_opt,
-            self.enable_hints_opt,
-            self.endless_mode_opt
-            ]
-
-        self.punish_missed_sets_opt.rule = PUNISH_MISSED_SETS
-        self.punish_missed_empties_opt.rule = PUNISH_MISSED_EMPTIES
-        self.enable_hints_opt.rule = ENABLE_HINTS
-        self.endless_mode_opt.rule = ENDLESS_MODE
-
-        for opt in self.opts:
-            opt.checkbox().active = self.get_rule(opt.rule)
-
+        self.opts = [opt for opt in self.children if isinstance(opt, LabeledCheckBox)]
+        self.set_opts()
         self.bound_funcs = {}
         self.bind_opts(True)
-        
+
+    def opts(self):
+        return 
 
     def on_opt_selected(self, rule, checkbox, value):
         self.set_rule(rule, value)
         if self.is_enable_hints_disabled():
-            self.set_rule(ENABLE_HINTS, False)
+            self.set_rule(Rule.ENABLE_HINTS, False)
         self.bind_opts(False)
         self.set_opts()
         self.bind_opts(True)
@@ -67,11 +51,11 @@ class GameSettings(BoxLayout):
     def set_opts(self):
         for opt in self.opts:
             opt.checkbox().active = self.get_rule(opt.rule)
-            if opt.rule == ENABLE_HINTS:
+            if opt.rule == Rule.ENABLE_HINTS:
                 opt.disable(self.is_enable_hints_disabled())
 
     def is_enable_hints_disabled(self):
-        return self.get_rule(PUNISH_MISSED_SETS) or self.get_rule(PUNISH_MISSED_EMPTIES)
+        return self.get_rule(Rule.PUNISH_MISSED_SETS) or self.get_rule(Rule.PUNISH_MISSED_EMPTIES)
 
     def bind_opts(self, activate):
         for opt in self.opts:

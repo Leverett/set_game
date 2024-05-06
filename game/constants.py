@@ -1,3 +1,5 @@
+from enum import StrEnum
+
 MAX_PLAYERS = 12
 SET_SIZE = 3
 STANDARD_FIELD_SIZE = 12
@@ -13,13 +15,14 @@ FLASH_INTERVAL = 0.12
 GAME_OVER = "Game Over"
 
 CONFIG_FILE = "config.ini"
-CONFIG_SP_RULES = "spRules"
-CONFIG_MP_RULES = "mpRules"
 
-# Game Settings
-PUNISH_MISSED_SETS = "punish_missed_sets"
-PUNISH_MISSED_EMPTIES = "punish_missed_empties"
-ENABLE_HINTS = "enable_hints"
-ENDLESS_MODE = "endless_mode"
+class GameMode(StrEnum):
+    SINGLE_PLAYER = "sp"
+    MULTI_PLAYER = "mp"
 
-RULES = [PUNISH_MISSED_SETS, PUNISH_MISSED_EMPTIES, ENABLE_HINTS, ENDLESS_MODE]
+class Rule(StrEnum):
+    PUNISH_MISSED_SETS = "punish_missed_sets"
+    PUNISH_MISSED_EMPTIES = "punish_missed_empties"
+    ENABLE_HINTS = "enable_hints"
+    ENDLESS_MODE = "endless_mode"
+

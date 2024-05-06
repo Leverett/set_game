@@ -35,7 +35,7 @@ class SPBasicStatsDisplay(GameStatsDisplay):
         super().__init__()
         self.sets_found_label = Label(text=sets_found_text(0))
         self.add_widget(self.sets_found_label)
-        self.remaining_deals_label = Label(text=remaining_deals_text(len(ALL_CARDS)))
+        self.remaining_deals_label = Label(text=remaining_deals_text(0))
         self.add_widget(self.remaining_deals_label)
 
     def update_game_stats(self, game_state, player) -> None:
@@ -92,7 +92,7 @@ class SPScoreStatsDisplay(SPStatsDisplay):
         else:
             self.misses_display = MissedEmptiesDisplay()
         self.add_widget(self.misses_display)
-        self.remaining_deals_label = Label(text=remaining_deals_text(len(ALL_CARDS)))
+        self.remaining_deals_label = Label(text=remaining_deals_text(0))
         self.add_widget(self.remaining_deals_label)
 
     def update_game_stats(self, game_state, player) -> None:

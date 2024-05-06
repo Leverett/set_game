@@ -26,20 +26,20 @@
     orientation: 'vertical'
     spacing: 5
     padding: 5
-    game_mode: constants.CONFIG_SP_RULES
+    game_mode: constants.GameMode.SINGLE_PLAYER
 
     LabeledCheckBox:
-        id: punish_missed_sets
         text: "Punish Missed Sets"
+        rule: constants.Rule.PUNISH_MISSED_SETS
     LabeledCheckBox:
-        id:  punish_missed_empties
         text: "Punish Missed Empties"
+        rule: constants.Rule.PUNISH_MISSED_EMPTIES
     LabeledCheckBox:
-        id:  enable_hints
         text: "Enable Hints"
+        rule: constants.Rule.ENABLE_HINTS
     LabeledCheckBox:
-        id:  endless_mode
         text: "Endless Mode"
+        rule: constants.Rule.ENDLESS_MODE
     
 
 <GameSettingsPopup>:

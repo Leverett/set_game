@@ -4,7 +4,7 @@ from app_roots.game_base import *
 from kivy.app import App
 
 
-Builder.load_file('widgets/sp_gameover_popup.kv')
+Builder.load_file('widgets/sp/gameover_popup.kv')
 
 class SPGame(SetGame):
     def __init__(self, rules):
@@ -60,7 +60,7 @@ class SPGame(SetGame):
 class GameOverPopup(Popup):
 
     def new_game(self):
-        App.get_running_app().start_game(CONFIG_SP_RULES)
+        App.get_running_app().start_game(GameMode.SINGLE_PLAYER)
         self.dismiss()
 
     def quit(self):

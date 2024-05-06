@@ -2,6 +2,7 @@ from kivy.app import App
 import os
 from widgets.game_stats_display import *
 from app_roots.home import HomeScreen, SPGame
+from game.constants import GameMode, Rule
 
 class RootWidget(BoxLayout):
     pass
@@ -19,8 +20,8 @@ class SetApp(App):
 
     def build(self):
         self.config.read(os.path.join(self.user_data_dir, CONFIG_FILE))
-        self.config.setdefaults(CONFIG_SP_RULES, Rules.default_rules().to_dict())
-        self.config.setdefaults(CONFIG_MP_RULES, Rules.default_rules().to_dict())
+        self.config.setdefaults(GameMode.SINGLE_PLAYER, Rules.default_rules().to_dict())
+        self.config.setdefaults(GameMode.MULTI_PLAYER, Rules.default_rules().to_dict())
         self.config.write()
         root = RootWidget()
         root.add_widget(HomeScreen())
@@ -38,10 +39,10 @@ class SetApp(App):
         self.config.write()
 
     def make_rules(self, game_mode):
-        return Rules(self.get_rule(PUNISH_MISSED_SETS, game_mode),
-                     self.get_rule(PUNISH_MISSED_EMPTIES, game_mode),
-                     self.get_rule(ENABLE_HINTS, game_mode),
-                     self.get_rule(ENDLESS_MODE, game_mode))
+        return Rules(self.get_rule(Rule.PUNISH_MISSED_SETS, game_mode),
+                     self.get_rule(Rule.PUNISH_MISSED_EMPTIES, game_mode),
+                     self.get_rule(Rule.ENABLE_HINTS, game_mode),
+                     self.get_rule(Rule.ENDLESS_MODE, game_mode))
 
     def start_game(self, game_mode):
         rules = self.make_rules(game_mode)

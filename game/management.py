@@ -1,18 +1,9 @@
 from copy import copy, deepcopy
-from random import shuffle
 from collections import defaultdict
 import bisect
 from game.events import *
 from game.game_objects import *
 
-deck_size = 81
-
-def init_deck():
-    deck = copy(ALL_CARDS)
-    while True:
-        shuffle(deck)
-        if contains_set(deck[:STANDARD_FIELD_SIZE]):
-            return deck[:deck_size]
 
 class SetGameManager:
     def handle_action(self, action):
@@ -24,9 +15,8 @@ class SetGameManager:
 class LocalGameManager(SetGameManager):
     def __init__(self, rules, players):
         SetGameManager.__init__(self)
-        self.deck = init_deck()
-        self.deck_index = STANDARD_FIELD_SIZE
-        self.game_state = SetGameState(self.deck[:self.deck_index], self.remaining_cards(), players)
+        self.deck = EndlessDeck() if rules.endless_mode else StandardDeck()
+        self.game_state = SetGameState(self.deck.initial_draw(), self.deck.remaining_cards(), players)
         if not rules:
             self.rules = Rules(True, False, True)
         else:
@@ -57,7 +47,7 @@ class LocalGameManager(SetGameManager):
         
         if is_set(*list(cards)):
             working_game_state = deepcopy(self.game_state)
-            replacement_cards = self.draw_cards()
+            replacement_cards = self.deck.draw_cards(working_game_state.displayed_cards)
             if len(replacement_cards) == 0:
                 for card in cards:
                     working_game_state.displayed_cards.remove(card)
@@ -69,12 +59,11 @@ class LocalGameManager(SetGameManager):
                 working_game_state.replace_card(card, replacement_cards[i])
             drawn_cards = []
             while not working_game_state.is_set_showing():
-                new_cards = self.draw_cards()
+                new_cards = self.deck.draw_cards(working_game_state.displayed_cards)
                 if len(new_cards) == 0:
                     return self.game_over_event(action)
                 working_game_state.displayed_cards.append(new_cards)
                 drawn_cards.append(new_cards)
-
             return self.valid_set_event(action, replacement_cards, drawn_cards)
 
         player_id = action.player_id
@@ -101,19 +90,6 @@ class LocalGameManager(SetGameManager):
     def get_events(self, player_action):
         index = bisect.bisect_left(self.events, player_action, key=lambda event: event.time)
         return self.events[index:]
-
-    def remaining_cards(self):
-        return len(self.deck) - self.deck_index
-    
-    def get_next_card(self):
-        if self.remaining_cards() == 0:
-            return None
-        next_card = self.deck[self.deck_index]
-        self.deck_index += 1
-        return next_card
-    
-    def draw_cards(self):
-        return [card for _ in range(SET_SIZE) if (card := self.get_next_card()) is not None]
     
     def valid_set_event(self, action, replacement_cards, drawn_cards):
         return ValidSetEvent(action, len(self.events), replacement_cards, drawn_cards)
