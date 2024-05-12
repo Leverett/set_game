@@ -26,3 +26,8 @@ class Rule(StrEnum):
     ENABLE_HINTS = "enable_hints"
     ENDLESS_MODE = "endless_mode"
 
+# host_ip = '0.0.0.0'
+host_ip = '127.0.0.1'
+
+def get_url(api):
+    return f"http://{host_ip}:5000/{api}"

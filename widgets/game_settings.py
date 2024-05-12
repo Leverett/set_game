@@ -1,6 +1,6 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.relativelayout import RelativeLayout
-from game.constants import *
+from game.globals import *
 from kivy.app import App
 from kivy.properties import StringProperty
 from functools import partial

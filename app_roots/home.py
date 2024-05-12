@@ -1,10 +1,9 @@
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
-from app_roots.sp_game import SPGame
-from app_roots.game_base import *
 from kivy.lang import Builder
+from kivy.uix.popup import Popup
 from widgets.game_settings import GameSettings
-from game.constants import *
+from game.globals import *
 
 Builder.load_file('layouts/home_screen.kv')
 Builder.load_file('widgets/game_settings_popup.kv')
@@ -26,5 +25,8 @@ class HomeScreen(BoxLayout):
     def start_sp_press(self):
         popup = GameSettingsPopup()
         popup.open()
+
+    def start_mp_press(self):
+        App.get_running_app().start_mp()
 
     

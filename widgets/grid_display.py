@@ -1,4 +1,4 @@
-from game.constants import *
+from game.globals import *
 from kivy.uix.image import Image
 from kivy.graphics import RoundedRectangle
 from kivy.graphics import Color as KivyColor

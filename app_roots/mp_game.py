@@ -3,25 +3,26 @@ from kivy.app import App
 from widgets.game_stats_display import GameStatsDisplay
 from widgets.grid_display import HighlightedImage
 from widgets.sp.game_stats_widgets import SPStatsDisplay
-from game.management import GameManager, LocalGameManager
+from mp.remote_manager import RemoteGameManager
 from kivy.uix.popup import Popup
 from kivy.lang import Builder
-from game.game_objects import Player, Rules
+from game.game_objects import Player
 from game.globals import *
-from game.events import Action, EventType
+from game.events import EventType
 
 
 Builder.load_file('widgets/sp/gameover_popup.kv')
 
-class SPGame(SetGame):
-    def __init__(self, rules: Rules):
-        manager: GameManager = LocalGameManager(rules, {default_id: Player(default_id, default_name)})
-        super().__init__(manager, manager.get_game_state(), player_id=default_id)
+class MPGame(SetGame):
+    def __init__(self, player: Player):
+        manager = RemoteGameManager(player, "game_id")
+        game_state = manager.get_game_state()
+        super().__init__(manager, game_state, player_id=default_id)
 
     def refresh(self):
         pass
 
-    def do_set_action(self, action: Action):
+    def do_set_action(self, action):
         events = self.manager.handle_action(action)
         self.selected_cards.clear()
         self.reset_card_opacity()
@@ -35,7 +36,7 @@ class SPGame(SetGame):
             if event.etype is EventType.VALID_SET_EVENT and event.game_over:
                 self.game_over()
 
-    def do_add_cards_action(self, action: Action):
+    def do_add_cards_action(self, action):
         events = self.manager.handle_action(action)
         self.selected_cards.clear()
         self.reset_card_opacity()
@@ -63,7 +64,7 @@ class SPGame(SetGame):
     def quit(self):
         App.get_running_app().go_home()
 
-    def title(self) -> str:
+    def title(self):
         return "Solitaire"
     
     def game_over(self):

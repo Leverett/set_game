@@ -1,6 +1,7 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.label import Label
-from game.game_objects import *
+from game.game_objects import Player
+from game.game_state import GameState
 from widgets.game_stats_display import GameStatsDisplay, GameStatsWidget
 
 
@@ -21,15 +22,15 @@ class SPStatsDisplay(GameStatsDisplay):
             self.add_widget(RemainingDealsDisplay())
 
 class ScoreDisplay(Label, GameStatsWidget):
-    def update_stats(self, game_state, player):
+    def update_stats(self, game_state: GameState, player: Player):
         self.text = f"Score: {game_state.player_score(player)}"
 
 class SetsFoundDisplay(Label, GameStatsWidget):
-    def update_stats(self, game_state, player):
+    def update_stats(self, game_state: GameState, player: Player):
         self.text = f"Sets Found: {len((player.sets))}"
 
 class RemainingDealsDisplay(Label, GameStatsWidget):
-    def update_stats(self, game_state, player):
+    def update_stats(self, game_state: GameState, player: Player):
         self.text = f"Remaining Deals: {game_state.remaining_cards // 3}"
 
 class MissesDisplay(BoxLayout, GameStatsWidget):
@@ -37,14 +38,14 @@ class MissesDisplay(BoxLayout, GameStatsWidget):
         super().__init__()
         self.orientation = 'vertical'
 
-    def update_stats(self, game_state, player):
+    def update_stats(self, game_state: GameState, player: Player):
         for child in self.children:
             child.update_stats(game_state, player)
 
 class MissedSetsDisplay(Label, GameStatsWidget):
-    def update_stats(self, game_state, player):
+    def update_stats(self, game_state: GameState, player: Player):
         self.text = f"Missed Sets: {player.missed_sets}"
 
 class MissedEmptiesDisplay(Label, GameStatsWidget):
-    def update_stats(self, game_state, player):
+    def update_stats(self, game_state: GameState, player: Player):
         self.text = f"Missed Empties: {player.missed_empties}"

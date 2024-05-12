@@ -1,29 +1,35 @@
+from abc import abstractmethod
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.image import Image
-from kivy.uix.popup import Popup
 from kivy.clock import Clock
 from kivy.lang import Builder
-from game.management import *
-from widgets.game_stats_display import *
-from widgets.grid_display import *
+from game.management import GameManager
+from widgets.game_stats_display import GameStatsDisplay
+from widgets.grid_display import HighlightedImage
+from game.game_state import GameState
+from typing import MutableSet
+from random import shuffle
+from game.events import Action, ActionType
+from game.game_objects import Card, Player, card_image_source
+from game.globals import *
 
 
 Builder.load_file('layouts/set_game.kv')
 
 class SetGame(BoxLayout):
-    def __init__(self, manager, game_state, player_id, **kwargs):
+    def __init__(self, manager: GameManager, game_state: GameState, player_id: str, **kwargs):
         BoxLayout.__init__(self, **kwargs)
-        self.manager=manager
-        self.game_state = game_state
-        self.player = game_state.players[player_id]
+        self.manager: GameManager = manager
+        self.game_state: GameState = game_state
+        self.player: Player = game_state.find_player(player_id)
 
-        self.selected_cards = set()
-        self.hints = set()
+        self.selected_cards: MutableSet[Card] = set()
+        self.hints: MutableSet[Card] = set()
         self.card_grid = self.ids.card_grid
         self.display_cards()
 
-        self.stats_display = self.make_game_stats_display()
+        self.stats_display: GameStatsDisplay = self.make_game_stats_display()
         self.ids.stats_display.add_widget(self.stats_display)
         self.update_game_stats()
 
@@ -38,7 +44,7 @@ class SetGame(BoxLayout):
     def display_cards(self):
         self.card_grid.clear_widgets()
 
-        for card in self.game_state.displayed_cards:
+        for card in self.game_state.field:
             image_source = card_image_source(card)
             image = Image(source=image_source, allow_stretch=True) if card not in self.hints else HighlightedImage(source=image_source, allow_stretch=True)
             image.bind(on_touch_down=self.on_card_click)
@@ -58,7 +64,7 @@ class SetGame(BoxLayout):
                 self.selected_cards.add(instance.card)
 
             if len(self.selected_cards) == SET_SIZE:
-                Clock.schedule_once(lambda _: self.do_set_action(CallSet(self.player.id, {card for card in self.selected_cards})), 0.2)
+                Clock.schedule_once(lambda _: self.do_set_action(Action(ActionType.CALL_SET, self.player.id, cards={card for card in self.selected_cards})), 0.2)
 
     def button_widget_parent(self):
         if self.manager.rules.punish_missed_empties or self.manager.rules.enable_hints:
@@ -71,11 +77,11 @@ class SetGame(BoxLayout):
         pass
 
     def shuffle_press(self, _):
-        shuffle(self.game_state.displayed_cards)
+        shuffle(self.game_state.field)
         self.display_cards()
 
     def add_cards_press(self, _):
-        self.do_add_cards_action(CallEmpty(self.player.id))
+        self.do_add_cards_action(Action(ActionType.CALL_EMPTY, self.player.id))
 
     @abstractmethod
     def do_add_cards_action(self):

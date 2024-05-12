@@ -1,5 +1,5 @@
 #:kivy 2.3.0
-#:import constants game.constants
+#:import globals game.globals
 
 <LabeledCheckBox>:
     orientation: 'horizontal'
@@ -26,20 +26,20 @@
     orientation: 'vertical'
     spacing: 5
     padding: 5
-    game_mode: constants.GameMode.SINGLE_PLAYER
+    game_mode: globals.GameMode.SINGLE_PLAYER
 
     LabeledCheckBox:
         text: "Punish Missed Sets"
-        rule: constants.Rule.PUNISH_MISSED_SETS
+        rule: globals.Rule.PUNISH_MISSED_SETS
     LabeledCheckBox:
         text: "Punish Missed Empties"
-        rule: constants.Rule.PUNISH_MISSED_EMPTIES
+        rule: globals.Rule.PUNISH_MISSED_EMPTIES
     LabeledCheckBox:
         text: "Enable Hints"
-        rule: constants.Rule.ENABLE_HINTS
+        rule: globals.Rule.ENABLE_HINTS
     LabeledCheckBox:
         text: "Endless Mode"
-        rule: constants.Rule.ENDLESS_MODE
+        rule: globals.Rule.ENDLESS_MODE
     
 
 <GameSettingsPopup>:
