@@ -5,6 +5,7 @@ from kivy.app import App
 from kivy.properties import StringProperty
 from functools import partial
 from kivy.clock import Clock
+from game.game_objects import Rule
 
 class LabeledCheckBox(RelativeLayout):
     text = StringProperty("")

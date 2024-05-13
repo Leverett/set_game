@@ -6,45 +6,35 @@ from widgets.sp.game_stats_widgets import SPStatsDisplay
 from mp.remote_manager import RemoteGameManager
 from kivy.uix.popup import Popup
 from kivy.lang import Builder
-from game.game_objects import Player
+from game.game_objects import Player, GameMode
 from game.globals import *
-from game.events import EventType
 
 
 Builder.load_file('widgets/sp/gameover_popup.kv')
 
 class MPGame(SetGame):
-    def __init__(self, player: Player):
-        manager = RemoteGameManager(player, "game_id")
-        game_state = manager.get_game_state()
-        super().__init__(manager, game_state, player_id=default_id)
+    def __init__(self):
+        player = Player(App.get_running_app().identity)
+        manager = RemoteGameManager(player, local_game_id)
+        game_state, rules = manager.get_current_game()
+        super().__init__(manager, game_state, rules, player_id=default_id)
 
     def refresh(self):
         pass
 
-    def do_set_action(self, action):
-        events = self.manager.handle_action(action)
-        self.selected_cards.clear()
-        self.reset_card_opacity()
-        if len(events) > 0:
-            event = events[0]
-            self.game_state.process_event(event)
-            if event.etype is EventType.VALID_SET_EVENT:
-                self.hints.clear()
-            self.display_cards()
-            self.update_game_stats()
-            if event.etype is EventType.VALID_SET_EVENT and event.game_over:
-                self.game_over()
+    def make_game_stats_display(self) -> GameStatsDisplay:
+        return SPStatsDisplay(self.rules)
+    
+    def quit(self):
+        App.get_running_app().go_home()
 
-    def do_add_cards_action(self, action):
-        events = self.manager.handle_action(action)
-        self.selected_cards.clear()
-        self.reset_card_opacity()
-        if len(events) > 0:
-            self.game_state.process_event(events[0])
-            self.display_cards()
-            self.update_game_stats()
+    def title(self):
+        return "Solitaire"
+    
+    def game_over(self):
+        GameOverPopup().open()
 
+    # Only for testing
     def do_hint(self):
         hint = self.game_state.get_hint(self.hints)
         if hint:
@@ -57,18 +47,6 @@ class MPGame(SetGame):
         for image in self.card_grid.children:
             if isinstance(image, HighlightedImage):
                 image.flash_hint()
-
-    def make_game_stats_display(self) -> GameStatsDisplay:
-        return SPStatsDisplay(self.manager.rules)
-    
-    def quit(self):
-        App.get_running_app().go_home()
-
-    def title(self):
-        return "Solitaire"
-    
-    def game_over(self):
-        GameOverPopup().open()
 
 class GameOverPopup(Popup):
 

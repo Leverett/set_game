@@ -1,46 +1,43 @@
 from time import time
-from enum import Enum
 from game.game_objects import Card
-from typing import List
+# from typing import list
 from host.serialization import GameSerializable
+from game.globals import *
 
 
-class ActionType(Enum):
+class ActionType(EnsurableEnum):
     CALL_EMPTY = "call_empty"
     CALL_SET = "call_set"
 
 class Action(GameSerializable):
     def __init__(self, atype: ActionType, player_id: str,
-                 timestamp: int = None, cards: List[Card] = []):
-        self.atype: ActionType = atype
+                 cards: list[Card] = []):
+        self.atype: ActionType = ActionType.ensure(atype)
         self.player_id: str = player_id
-        self.timestamp: int = time() if timestamp is None else timestamp
-        self.cards: List[Card] = cards
+        self.cards: list[Card] = cards
     
     def __repr__(self) -> str:
-        return f"{self.atype} - {self.player_id} - {self.timestamp} - {self.cards}"
+        return f"{self.atype} - {self.player_id} - {self.cards}"
     
     def to_json(self) -> dict:
         return {
             'atype': self.atype,
             'player_id': self.player_id,
-            'timestamp': self.timestamp,
-            'cards': [card.from_json() for card in self.cards],
+            'cards': [card.to_json() for card in self.cards],
         }
     
     @classmethod
     def from_json(cls, json_data: dict):
-        atype = json_data['atype']
+        atype = ActionType(json_data['atype'])
         player_id = json_data['player_id']
-        timestamp = json_data['timestamp']
         
         cards_data = json_data.get('cards', [])
         cards = [Card.from_json(card) for card in cards_data]
         
-        return cls(atype, player_id, timestamp=timestamp,
+        return cls(atype, player_id,
                    cards=cards)
 
-class EventType(Enum):
+class EventType(EnsurableEnum):
     VALID_SET_EVENT = "valid_set_event"
     INVALID_SET_EVENT = "invalid_set_event"
     VALID_CALL_EMPTY_EVENT = "valid_call_empty_event"
@@ -48,15 +45,15 @@ class EventType(Enum):
 
 class Event(GameSerializable):
     def __init__(self, etype: EventType, player_id: str, timestamp: int, event_num: int,
-                 selected_cards: List[Card] = [], replacement_cards: List[Card] = [], drawn_cards: List[Card] = [],
+                 selected_cards: list[Card] = [], replacement_cards: list[Card] = [], drawn_cards: list[Card] = [],
                  game_over=False):
-        self.etype: EventType = etype
+        self.etype: EventType = EventType.ensure(etype)
         self.player_id: str = player_id
         self.timestamp: int = timestamp
         self.event_num: int = event_num
-        self.selected_cards: List[Card] = selected_cards
-        self.replacement_cards: List[Card] = replacement_cards
-        self.drawn_cards: List[Card] = drawn_cards
+        self.selected_cards: list[Card] = selected_cards
+        self.replacement_cards: list[Card] = replacement_cards
+        self.drawn_cards: list[Card] = drawn_cards
         self.game_over: bool = game_over
     
     def __repr__(self) -> str:

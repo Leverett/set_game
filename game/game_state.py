@@ -2,7 +2,7 @@ from collections import defaultdict
 from itertools import combinations
 from game.game_objects import MissingEventException, Player, Card, is_set, contains_set
 from game.events import Event, EventType
-from typing import MutableSet, List, DefaultDict
+# from typing import set, list, defaultdict
 from random import shuffle
 from game.globals import *
 from host.serialization import GameSerializable
@@ -10,14 +10,14 @@ from host.serialization import GameSerializable
 
 class GameState(GameSerializable):
 
-    def __init__(self, field: List[Card], remaining_cards: int, players: List[Player],
-                 num_events: int = 0, round_called_empty: str = None, round_missed_sets: DefaultDict[str,List[MutableSet[Card]]] = defaultdict(list), game_over: bool = False):
-        self.field: List[Card] = field
+    def __init__(self, field: list[Card], remaining_cards: int, players: list[Player],
+                 num_events: int = 0, round_called_empty: str = None, round_missed_sets: defaultdict[str,list[set[Card]]] = defaultdict(list), game_over: bool = False):
+        self.field: list[Card] = field
         self.remaining_cards: int = remaining_cards
-        self.players: List[Player] = players
+        self.players: list[Player] = players
         self.num_events: int = num_events
         self.round_called_empty: str = round_called_empty
-        self.round_missed_sets: DefaultDict[str,List[MutableSet[Card]]] = round_missed_sets
+        self.round_missed_sets: defaultdict[str,list[set[Card]]] = round_missed_sets
         self.game_over: bool = game_over
 
     def is_set_showing(self):
@@ -69,7 +69,7 @@ class GameState(GameSerializable):
     def player_score(self, player: Player) -> int:
         return self.find_player(player.id).score()
     
-    def get_hint(self, hints: MutableSet[Card]) -> Card:
+    def get_hint(self, hints: set[Card]) -> Card:
         if len(hints) + 1 == SET_SIZE:
             return None
         all_possible_sets = [possible_set for possible_set in combinations(self.field, SET_SIZE) if hints.issubset(set(possible_set))]

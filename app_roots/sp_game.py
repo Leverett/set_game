@@ -6,43 +6,21 @@ from widgets.sp.game_stats_widgets import SPStatsDisplay
 from game.management import GameManager, LocalGameManager
 from kivy.uix.popup import Popup
 from kivy.lang import Builder
-from game.game_objects import Player, Rules
+from game.game_objects import Player, Rules, GameMode
 from game.globals import *
-from game.events import Action, EventType
 
 
 Builder.load_file('widgets/sp/gameover_popup.kv')
 
 class SPGame(SetGame):
     def __init__(self, rules: Rules):
-        manager: GameManager = LocalGameManager(rules, {default_id: Player(default_id, default_name)})
-        super().__init__(manager, manager.get_game_state(), player_id=default_id)
+        player = Player(App.get_running_app().identity)
+        manager: GameManager = LocalGameManager(rules, [player])
+        game_state, rules = manager.get_current_game()
+        super().__init__(manager, game_state, rules, player_id=default_id)
 
     def refresh(self):
         pass
-
-    def do_set_action(self, action: Action):
-        events = self.manager.handle_action(action)
-        self.selected_cards.clear()
-        self.reset_card_opacity()
-        if len(events) > 0:
-            event = events[0]
-            self.game_state.process_event(event)
-            if event.etype is EventType.VALID_SET_EVENT:
-                self.hints.clear()
-            self.display_cards()
-            self.update_game_stats()
-            if event.etype is EventType.VALID_SET_EVENT and event.game_over:
-                self.game_over()
-
-    def do_add_cards_action(self, action: Action):
-        events = self.manager.handle_action(action)
-        self.selected_cards.clear()
-        self.reset_card_opacity()
-        if len(events) > 0:
-            self.game_state.process_event(events[0])
-            self.display_cards()
-            self.update_game_stats()
 
     def do_hint(self):
         hint = self.game_state.get_hint(self.hints)
@@ -58,7 +36,7 @@ class SPGame(SetGame):
                 image.flash_hint()
 
     def make_game_stats_display(self) -> GameStatsDisplay:
-        return SPStatsDisplay(self.manager.rules)
+        return SPStatsDisplay(self.rules)
     
     def quit(self):
         App.get_running_app().go_home()

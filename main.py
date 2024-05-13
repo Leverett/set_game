@@ -1,16 +1,15 @@
 from kivy.app import App
-import atexit
 import os
-import subprocess
 import sys
+import subprocess
+import atexit
 from kivy.uix.widget import Widget
 from kivy.uix.boxlayout import BoxLayout
 from app_roots.home import HomeScreen
 from app_roots.sp_game import SPGame
 from app_roots.mp_game import MPGame
 from game.globals import *
-from game.game_objects import Rules, Player
-from mp.identity import Identity
+from game.game_objects import Rules, Identity, GameMode, Rule
 import requests
 
 class RootWidget(BoxLayout):
@@ -21,7 +20,6 @@ class SetApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.identity = Identity(default_id, default_name)
-        # self.identity = None
         
     def update_config(self):
         self.config.write()
@@ -30,26 +28,37 @@ class SetApp(App):
         return self.config
 
     def build(self):
-        # python_interpreter = sys.executable
-        # self.host_instance = subprocess.Popen([python_interpreter, os.path.join(os.getcwd(), 'host', 'local_main.py')])
-        # atexit.register(self.host_instance.terminate)
         self.config.read(os.path.join(self.user_data_dir, CONFIG_FILE))
         self.config.setdefaults(GameMode.SINGLE_PLAYER, Rules.default_rules().to_dict())
         self.config.setdefaults(GameMode.MULTI_PLAYER, Rules.default_rules().to_dict())
+        self.config.setdefaults("Identity", self.identity.to_dict())
         self.config.write()
         root = RootWidget()
         root.add_widget(HomeScreen())
-        self.send_request_to_flask()
+        connected = False #self.send_request_to_flask()
+        if not connected:
+            self.start_local_host()
+            self.send_request_to_flask()
         return root
     
-    def send_request_to_flask(self):
+    def start_local_host(self):
+        print("Starting local host")
+        python_interpreter = sys.executable
+        self.host_instance = subprocess.Popen([python_interpreter, os.path.join(os.getcwd(), 'host', 'main.py')])
+        # self.host_instance = subprocess.Popen([python_interpreter, os.path.join(os.getcwd(), 'host', 'local_main.py')])
+        atexit.register(self.host_instance.terminate)
+
+    def send_request_to_flask(self) -> bool:
         print("Sending ping")
         try:
             response = requests.get(get_url('ping'))
             if response.status_code == 200:
                 print("Received ping")
+                return True
         except requests.exceptions.ConnectionError:
-            print("Failed to connect to Flask server.")
+            pass
+        print("Failed to connect to Flask server.")
+        return False
     
     def switch_root(self, new_root: Widget):
         self.root.clear_widgets()
@@ -76,13 +85,13 @@ class SetApp(App):
     def go_home(self):
         self.switch_root(HomeScreen())
 
-    # def stop_host(self):
-    #     # requests.get('http://127.0.0.1:5000/shutdown')
-    #     # self.host_instance.wait()
-    #     self.host_instance.terminate()
+    def stop_host(self):
+        self.host_instance.terminate()
+        # requests.get('http://127.0.0.1:5000/shutdown')
+        # self.host_instance.wait()
 
     def start_mp(self):
-        self.switch_root(MPGame(Player(self.identity.player_id, self.identity.player_name)))
+        self.switch_root(MPGame())
 
 
 if __name__ == '__main__':

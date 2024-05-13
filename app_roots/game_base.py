@@ -10,18 +10,19 @@ from widgets.grid_display import HighlightedImage
 from game.game_state import GameState
 from typing import MutableSet
 from random import shuffle
-from game.events import Action, ActionType
-from game.game_objects import Card, Player, card_image_source
+from game.events import Action, ActionType, EventType
+from game.game_objects import Card, Player, card_image_source, Rules
 from game.globals import *
 
 
 Builder.load_file('layouts/set_game.kv')
 
 class SetGame(BoxLayout):
-    def __init__(self, manager: GameManager, game_state: GameState, player_id: str, **kwargs):
+    def __init__(self, manager: GameManager, game_state: GameState, rules: Rules, player_id: str, **kwargs):
         BoxLayout.__init__(self, **kwargs)
         self.manager: GameManager = manager
         self.game_state: GameState = game_state
+        self.rules: Rules = rules
         self.player: Player = game_state.find_player(player_id)
 
         self.selected_cards: MutableSet[Card] = set()
@@ -35,9 +36,9 @@ class SetGame(BoxLayout):
 
         self.buttons_layout = self.ids.buttons_layout
         self.buttons_layout.add_widget(Button(text="Shuffle", on_press=self.shuffle_press))
-        if self.manager.rules.punish_missed_empties:
+        if self.rules.punish_missed_empties:
             self.buttons_layout.add_widget(Button(text="Add Cards", on_press=self.add_cards_press))
-        elif self.manager.rules.enable_hints:
+        elif self.rules.enable_hints:
             self.buttons_layout.add_widget(Button(text="Hint", on_press=self.hint_press))
 
 
@@ -67,14 +68,33 @@ class SetGame(BoxLayout):
                 Clock.schedule_once(lambda _: self.do_set_action(Action(ActionType.CALL_SET, self.player.id, cards={card for card in self.selected_cards})), 0.2)
 
     def button_widget_parent(self):
-        if self.manager.rules.punish_missed_empties or self.manager.rules.enable_hints:
+        if self.rules.punish_missed_empties or self.rules.enable_hints:
             button_widget_parent = BoxLayout(orientation='horizontal', height='64dp', size_hint_y=None)
             self.add_widget(button_widget_parent)
         return self
 
-    @abstractmethod
-    def do_set_action(self):
-        pass
+    def do_set_action(self, action: Action):
+        events = self.manager.handle_action(action)
+        self.selected_cards.clear()
+        self.reset_card_opacity()
+        if len(events) > 0:
+            event = events[0]
+            self.game_state.process_event(event)
+            if event.etype is EventType.VALID_SET_EVENT:
+                self.hints.clear()
+            self.display_cards()
+            self.update_game_stats()
+            if event.etype is EventType.VALID_SET_EVENT and event.game_over:
+                self.game_over()
+
+    def do_add_cards_action(self, action: Action):
+        events = self.manager.handle_action(action)
+        self.selected_cards.clear()
+        self.reset_card_opacity()
+        if len(events) > 0:
+            self.game_state.process_event(events[0])
+            self.display_cards()
+            self.update_game_stats()
 
     def shuffle_press(self, _):
         shuffle(self.game_state.field)
@@ -82,10 +102,6 @@ class SetGame(BoxLayout):
 
     def add_cards_press(self, _):
         self.do_add_cards_action(Action(ActionType.CALL_EMPTY, self.player.id))
-
-    @abstractmethod
-    def do_add_cards_action(self):
-        pass
 
     def hint_press(self, _):
         self.do_hint()
