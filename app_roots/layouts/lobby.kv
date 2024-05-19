@@ -1,0 +1,63 @@
+#:kivy 2.3.0
+#:import globals game.globals 
+#:include widgets/labeled_checkbox.kv
+
+
+<GameSettingsInLobby>:
+    orientation: 'vertical'
+    height: self.minimum_height
+    spacing: 5
+    padding: 5
+    game_mode: globals.GameMode.MULTI_PLAYER
+    pos_hint: {'top': 1}
+
+    LabeledCheckBox:
+        text: "Punish Missed Sets"
+        rule: globals.Rule.PUNISH_MISSED_SETS
+        size_hint_y: None
+        height: '40dp'
+    LabeledCheckBox:
+        text: "Punish Missed Empties"
+        rule: globals.Rule.PUNISH_MISSED_EMPTIES
+        size_hint_y: None
+        height: '40dp'
+    Widget:
+        size_hint_y: 1
+
+<Lobby>:
+    orientation: 'vertical'
+    BoxLayout:
+        size_hint_y: None
+        height: '50dp'
+        padding: 10
+        spacing: 10
+        Label:
+            id: title_label
+            text: ''
+            size_hint_x: None
+            width: self.texture_size[0]
+        Widget:
+            size_hint_x: 1
+        Button:
+            text: 'Exit'
+            size_hint_x: None
+            width: '100dp'
+            on_press: root.on_exit_pressed()
+    BoxLayout:
+        orientation: 'horizontal'
+        BoxLayout:
+            orientation: 'vertical'
+            id: players_list
+            size_hint_x: 0.5
+            Widget:
+                size_hint_y: 1
+
+        GameSettingsInLobby:
+            id: game_settings
+            size_hint_x: 0.5
+    Button:
+        size_hint: (1, None)
+        height: '50dp'
+        id: start_button
+        text: "Start Game"
+        on_press: root.on_start_press()

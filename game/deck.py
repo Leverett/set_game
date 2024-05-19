@@ -6,8 +6,6 @@ from game.globals import *
 from game.game_objects import Card, all_cards, contains_set
 
 
-short_game = True
-deck_size = 15
 # This could probably be implemented in a way in which draw_cards would do the complete draw
 # rather than 3 at a time, and throw an error if it reached a point where the deck ran out
 # before a set was displayed

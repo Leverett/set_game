@@ -29,10 +29,10 @@ class GameSettings(BoxLayout):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.app = App.get_running_app()
         Clock.schedule_once(self._on_widget_ready)
 
     def _on_widget_ready(self, dt):
-        self.app = App.get_running_app()
         self.opts = [opt for opt in self.children if isinstance(opt, LabeledCheckBox)]
         self.set_opts()
         self.bound_funcs = {}
@@ -45,6 +45,9 @@ class GameSettings(BoxLayout):
         self.set_rule(rule, value)
         if self.is_enable_hints_disabled():
             self.set_rule(Rule.ENABLE_HINTS, False)
+        self.update_opts()
+
+    def update_opts(self):
         self.bind_opts(False)
         self.set_opts()
         self.bind_opts(True)

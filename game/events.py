@@ -1,6 +1,4 @@
-from time import time
 from game.game_objects import Card
-# from typing import list
 from host.serialization import GameSerializable
 from game.globals import *
 

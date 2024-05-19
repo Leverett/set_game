@@ -1,0 +1,22 @@
+#:kivy 2.3.0
+
+<LabeledCheckBox>:
+    orientation: 'horizontal'
+    size_hint: 1, 0.2
+    pos_hint: {'center_x': 0.5}
+    Label:
+        id: label
+        text: root.text
+        size_hint_x: 0.8
+        halign: 'left'
+        text_size: self.size
+        valign: 'middle'
+        padding_x: dp(10)
+
+    CheckBox:
+        id: checkbox
+        size_hint_x: None
+        size_hint_x: 0.2
+        width: dp(30)
+        valign: 'middle'
+        pos_hint: {'right': 1}

@@ -8,10 +8,23 @@ default_id = "id1"
 default_name = "leverett"
 local_game_id = "local"
 
-GAME_ID_KEY = 'game_id'
+#Testing
+test_id = "test_id"
+test_name = "Test Host"
+test_lobby_id = "test_lobby"
+
+SUCCESS_KEY = 'success'
 ACTION_KEY = 'action'
 EVENTS_KEY = 'events'
 TIMESTAMP_KEY = 'timestamp'
+PLAYER_KEY = 'player'
+INSTANCE_KEY = 'instance'
+RULES_KEY = 'rules'
+GAME_STATE_KEY = 'game_state'
+LOBBIES_KEY = 'lobbies'
+LOBBY_STATE_KEY = 'lobby_state'
+REASON_KEY = 'reason'
+
 
 GRID_WIDTH = 3
 HINT_FLASHES = 3

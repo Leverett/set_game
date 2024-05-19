@@ -1,22 +1,20 @@
 #:kivy 2.3.0
 #:import globals game.globals 
  
-<GameOverPopup>:
+<GameOverPopup@Popup>:
     size: (400, 150)
     size_hint: (None, None)
-    title: constants.GAME_OVER
+    title: globals.GAME_OVER
     auto_dismiss: False
 
     BoxLayout:
         orientation: 'horizontal'
         size_hint: (1, 0.66)
         pos_hint: {'bottom': 1}
-
         Button:
             text: "Quit"
             on_press: root.quit()
             pos_hint: {'left': 1}
-
         Button:
             text: "Play Again"
             on_press: root.new_game()

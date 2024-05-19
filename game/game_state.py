@@ -1,8 +1,7 @@
 from collections import defaultdict
 from itertools import combinations
-from game.game_objects import MissingEventException, Player, Card, is_set, contains_set
+from game.game_objects import Identity, MissingEventException, Player, Card, is_set, contains_set
 from game.events import Event, EventType
-# from typing import set, list, defaultdict
 from random import shuffle
 from game.globals import *
 from host.serialization import GameSerializable
@@ -37,6 +36,8 @@ class GameState(GameSerializable):
             self.process_valid_call_empty_event(event)
         if event.etype is EventType.INVALID_CALL_EMPTY_EVENT:
             self.process_invalid_call_empty_event(event)
+        if self.game_over:
+            return
         self.num_events += 1
 
     def process_valid_set_event(self, event: Event):
@@ -81,8 +82,11 @@ class GameState(GameSerializable):
                         return card
         return None
     
-    def find_player(self, player_id: str) -> Player:
-        return next((player for player in self.players if player.id == player_id), None)
+    def find_player(self, identity) -> Player: #TODO make everything work from Identity/Player
+        for player in self.players:
+            if (isinstance(identity, Identity) and identity == player) or (identity == player.id):
+                return player
+        # return next((player for player in self.players if player.id == player_id), None)
 
     def print_displayed_cards(self):
         for i in range(0, len(self.field), GRID_WIDTH):

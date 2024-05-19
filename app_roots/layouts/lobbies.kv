@@ -1,0 +1,60 @@
+#:kivy 2.3.0
+#:import globals game.globals 
+
+<LobbyBox@BoxLayout>:
+    orientation: 'horizontal'
+    size_hint_y: None
+    height: '60dp'
+    spacing: 10
+    padding: [10, 0]
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    Label:
+        text: root.name
+        size_hint_x: 0.8
+        halign: 'left'
+        valign: 'middle'
+        text_size: self.size
+
+    Label:
+        text: f"{root.num_players}/{globals.MAX_PLAYERS}"
+        size_hint_x: 0.2
+        halign: 'right'
+        valign: 'middle'
+        text_size: self.size
+
+<Lobbies>:
+    BoxLayout:
+        id: body
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: None
+            height: '50dp'
+            padding: 10
+            spacing: 10
+            Label:
+                text: 'Lobbies'
+                size_hint_x: None
+                width: self.texture_size[0]
+            Widget:
+                size_hint_x: 1
+            Button:
+                text: 'Back'
+                size_hint_x: None
+                width: '100dp'
+                on_press: root.on_back_pressed()
+
+        ScrollView:
+            id: lobbies_view
+            do_scroll_x: False
+            BoxLayout:
+                id: lobbies_list
+                orientation: 'vertical'
+                size_hint_y: None
+                height: self.minimum_height
+
+        Button:
+            text: 'Make New Game'
+            size_hint_y: None
+            height: '50dp'
+            on_press: root.on_new_game_pressed()

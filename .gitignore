@@ -2,6 +2,7 @@
 backup_stuff
 converter.py
 scratch.py
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

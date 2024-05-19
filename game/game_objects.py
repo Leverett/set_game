@@ -114,21 +114,22 @@ class Identity(GameSerializable):
     
     def to_dict(self) -> dict:
         return {
-            'player_id': self.id,
-            'player_name': self.name
+            'id': self.id,
+            'name': self.name
         }
     
     def to_json(self) -> dict:
-        return {
-            'id': self.id,
-            'name': self.name,
-        }
+        return self.to_dict()
     
     @classmethod
     def from_json(cls, json_data: dict) -> Self:
         id = json_data['id']
         name = json_data['name']
         return cls(id, name)
+    
+    @classmethod
+    def default_identity(cls) -> Self:
+        return Identity(default_id, default_name)
 
 class Player(Identity):
     def __init__(self, identity: Identity,

@@ -1,110 +1,178 @@
 from flask import Flask, request, jsonify
 import os
 import sys
+
 sys.path.append(os.getcwd())
 from game.management import LocalGameManager
 from game.game_objects import Identity, Rules
 from game.globals import *
-from host.instance import Instance, LobbyInstance, GameInstance
+from host.instance import Instance, RejectionReason
 from game.events import Action, Event
+from mp.lobby_state import LobbyState
 
 
 app = Flask(__name__)
+instances: dict[str, Instance] = {}
+instances[test_lobby_id] = Instance(LobbyState(test_lobby_id, Identity(test_id, test_name), Rules.default_rules()))
 
-game_instances = {}
-lobby_instances = {}
-
-default_identity = Identity(default_id, default_name)
-game_instances[local_game_id] = GameInstance(local_game_id, default_identity, Rules(False, False, True, True), [default_identity])
-
-def get_instance(request_payload: dict) -> Instance:
-    return game_instances[request_payload[GAME_ID_KEY]]
-
-# Game Handlers
 @app.route('/ping', methods=['GET'])
 def ping():
     return jsonify(success=True)
 
-@app.route('/action', methods=['POST'])
-def handle_action():
+
+# Lobby Handlers
+
+@app.route('/get_lobbies', methods=['GET'])
+def get_lobbies():
     request_payload = request.get_json()
-    manager: LocalGameManager = get_instance(request_payload).manager
+    open_lobbies = [instance.lobby_state for instance in instances.values() if not instance.is_started()]
+    open_lobbies_payload = [lobby.to_json() for lobby in open_lobbies]
+
+    player: Identity = Identity.from_json(request_payload[PLAYER_KEY])
+    active_games = [instance for instance in instances.values() if instance.is_started() and not instance.is_done()]
+    active_game = next((instance for instance in active_games if instance.has_player(player)), None)
+    if active_game is not None:
+        game_state, rules = active_game.manager.get_current_game()
+        game_state_payload = game_state.to_json()
+        rules_payload = rules.to_json()
+        return jsonify(success=True, lobbies=open_lobbies_payload, game_state=game_state_payload, rules=rules_payload)
+    return jsonify(success=True, lobbies=open_lobbies_payload)
+
+@app.route('/create_lobby', methods=['POST'])
+def create_lobby():
+    request_payload = request.get_json()
+    player: Identity = Identity.from_json(request_payload[PLAYER_KEY])
+    rules: Rules = Rules.from_json(request_payload[RULES_KEY])
+    lobby_id = f"lid_{player.id}"
+    instance = instances.get(lobby_id, None)
+    lobby = LobbyState(lobby_id, player, rules)
+    instance = Instance(lobby)
+    instances[lobby_id] = instance
+    
+    return jsonify(success=True, lobby_state=instance.lobby_state.to_json())
+
+@app.route('/join_lobby/<string:lobby_id>', methods=['POST'])
+def join_lobby(lobby_id: str):
+    request_payload = request.get_json()
+    player: Identity = Identity.from_json(request_payload[PLAYER_KEY])
+    lobby_id: str = request_payload[INSTANCE_KEY]
+    instance = instances.get(lobby_id, None)
+    if instance is None:
+        return jsonify(success=False, reason=RejectionReason.CLOSED)
+    instance = instances[lobby_id]
+
+    if instance.is_started():
+        if instance.has_player(player):
+            game_state, rules = instance.manager.get_current_game()
+            game_state_payload = game_state.to_json()
+            rules_payload = rules.to_json()
+            return jsonify(success=True, game_state=game_state_payload, rules=rules_payload)
+        else:
+            return jsonify(success=False, reason=RejectionReason.STARTED)
+    if instance.is_full():
+        return jsonify(success=False, reason=RejectionReason.FULL)
+    instance.add_player(player)
+    return jsonify(success=True, lobby_state=instance.lobby_state.to_json())
+
+@app.route('/leave_lobby/<string:lobby_id>', methods=['POST'])
+def leave_lobby(lobby_id: str):
+    instance = instances.get(lobby_id, None)
+    if instance is None:
+        return get_lobbies()
+    request_payload = request.get_json()
+    player: Identity = Identity.from_json(request_payload[PLAYER_KEY])
+
+    if instance.is_host(player):
+        del instances[lobby_id]
+    else:
+        instance.remove_player(player)
+    return get_lobbies()
+
+@app.route('/update_rules/<string:lobby_id>', methods=['POST'])
+def update_rules(lobby_id: str):
+    instance = instances.get(lobby_id, None)
+    if instance is None: #TODO do I actually need to handle these cases? This is only accessible to the host
+        return jsonify(success=False, reason=RejectionReason.CLOSED)
+    if instance.is_started():
+        return jsonify(success=False, reason=RejectionReason.STARTED)
+    request_payload = request.get_json()
+    rules_payload = request_payload[RULES_KEY]
+    rules = Rules.from_json(rules_payload)
+    instance.lobby_state.rules = rules
+    return jsonify(success=True, lobby_state=instance.lobby_state.to_json())
+
+@app.route('/start_game/<string:lobby_id>', methods=['POST'])
+def start_game(lobby_id: str):
+    instance = instances.get(lobby_id, None)
+    if instance is None:
+        return jsonify(success=False, reason=RejectionReason.CLOSED)
+    instance.start_game()
+    game_state, rules = instance.manager.get_current_game()
+    game_state_payload = game_state.to_json()
+    rules_payload = rules.to_json()
+    return jsonify(success=True, game_state=game_state_payload, rules=rules_payload)
+    
+
+@app.route('/get_lobby_state/<string:lobby_id>', methods=['GET'])
+def get_lobby_state(lobby_id: str):
+    instance = instances.get(lobby_id, None)
+    if instance is None:
+        return jsonify(success=False, reason=RejectionReason.CLOSED)
+    if instance.is_started():
+        game_state, rules = instance.manager.get_current_game()
+        game_state_payload = game_state.to_json()
+        rules_payload = rules.to_json()
+        return jsonify(success=True, game_state=game_state_payload, rules=rules_payload)
+    return jsonify(success=True, lobby_state=instance.lobby_state.to_json())
+
+
+# Game Handlers
+
+@app.route('/action/<string:game_id>', methods=['POST'])
+def handle_action(game_id: str):
+    instance = instances.get(game_id, None)
+    if instance is None:
+        return jsonify(success=False, reason=RejectionReason.CLOSED)
+    request_payload = request.get_json()
     action_payload = request_payload[ACTION_KEY]
     timestamp = request_payload[TIMESTAMP_KEY]
     action = Action.from_json(action_payload)
-    events: list[Event] = manager.handle_action(action, timestamp=timestamp)
+    events: list[Event] = instance.manager.handle_action(action, timestamp=timestamp)
     events_payload = [event.to_json() for event in events]
     if len(events) > 0:
-        return jsonify(events=events_payload, success=True)
+        return jsonify(success=True, events=events_payload)
     return jsonify(success=False)
 
-@app.route('/events', methods=['GET'])
-def get_events():
+@app.route('/events/<string:game_id>', methods=['GET'])
+def get_events(game_id: str):
+    instance = instances.get(game_id, None)
+    if instance is None:
+        return jsonify(success=False, reason=RejectionReason.CLOSED)
     request_payload = request.get_json()
-    manager: LocalGameManager = get_instance(request_payload).manager
     timestamp = request_payload[TIMESTAMP_KEY]
-    events: list[Event] = manager.get_events(timestamp)
+    events: list[Event] = instance.manager.get_events(timestamp)
     events_payload = [event.to_json() for event in events]
     if len(events) > 0:
-        return jsonify(events=events_payload, success=True)
+        return jsonify(success=True, events=events_payload)
     return jsonify(success=False)
 
-
-@app.route('/current_game', methods=['GET'])
-def get_current_game():
-    request_payload = request.get_json()
-    manager: LocalGameManager = get_instance(request_payload).manager
-    game_state, rules = manager.get_current_game()
+@app.route('/current_game/<string:game_id>', methods=['GET'])
+def get_current_game(game_id: str):
+    instance = instances.get(game_id, None)
+    if instance is None:
+        return jsonify(success=False, reason=RejectionReason.CLOSED)
+    game_state, rules = instance.manager.get_current_game()
     game_state_payload = game_state.to_json()
     rules_payload = rules.to_json()
-    return jsonify(game_state=game_state_payload, rules=rules_payload)
+    return jsonify(success=True, game_state=game_state_payload, rules=rules_payload)
+
+def get_manager(request_payload: str) -> LocalGameManager:
+    instance = instances.get(request_payload[INSTANCE_KEY], None)
+    if instance is None:
+        return None
+    return instances[request_payload[INSTANCE_KEY]].manager
 
 if __name__ == '__main__':
     app.run(debug=True, host=host_ip, port=5000)
 
 
-
-
-# def get_instances():
-#     return [lobby_instances.values(), game_instances.values()]
-
-# @app.route('/lobbies', methods=['GET'])
-# def get_lobbies():
-#     return jsonify(Lobbies(*get_instances()))
-
-# @app.route('/start_lobby', methods=['POST'])
-# def start_lobby():
-#     player = request.json['player']
-#     rules = request.json['rules']
-#     lobby_instance = LobbyInstance(player, rules)
-#     return jsonify(LobbyEvent(lobby_instance.get_lobby()))
-
-# @app.route('/join_lobby', methods=['POST'])
-# def join_lobby():
-#     player = request.json['player']
-#     lobby_id = request.json['lobby_id']
-#     lobby_instance = lobby_instances[lobby_id]
-#     if lobby_instance == None:
-#         return jsonify(LobbyRejected(*get_instances(), Reason.CLOSED), success=False)
-#     result = lobby_instance.add_player(player)
-#     success = isinstance(result, LobbyRejected)
-#     return jsonify(result, success=success)
-
-# @app.route('/leave_lobby', methods=['POST'])
-# def leave_lobby():
-#     player = request.json['player']
-#     lobby_id = request.json['lobby_id']
-#     lobby_instance = lobby_instances[lobby_id]
-#     lobby_instance.remove_player(player)
-#     return get_lobbies()
-
-# @app.route('/lobby_update', methods=['GET'])
-# def lobby_update():
-#     lobby_id = request.json['lobby_id']
-#     lobby_instance = lobby_instances[lobby_id]
-#     if lobby_instance is None:
-#         game_instance = game_instances[lobby_id]
-#         if game_instance is None:
-#             return jsonify(LobbyRejected(*get_instances(), Reason.CLOSED))
-#         return GameStarting(game_instance)
-#     return get_lobbies()

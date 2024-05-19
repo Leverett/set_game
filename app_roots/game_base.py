@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.image import Image
@@ -6,7 +7,7 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 from game.management import GameManager
 from widgets.game_stats_display import GameStatsDisplay
-from widgets.grid_display import HighlightedImage
+from widgets.card_image import HighlightedImage
 from game.game_state import GameState
 from typing import MutableSet
 from random import shuffle
@@ -15,15 +16,16 @@ from game.game_objects import Card, Player, card_image_source, Rules
 from game.globals import *
 
 
-Builder.load_file('layouts/set_game.kv')
+Builder.load_file('app_roots/layouts/set_game.kv')
 
 class SetGame(BoxLayout):
-    def __init__(self, manager: GameManager, game_state: GameState, rules: Rules, player_id: str, **kwargs):
-        BoxLayout.__init__(self, **kwargs)
+    def __init__(self, manager: GameManager, game_state: GameState, rules: Rules, **kwargs):
+        super().__init__(**kwargs)
+        self.app = App.get_running_app()
         self.manager: GameManager = manager
         self.game_state: GameState = game_state
         self.rules: Rules = rules
-        self.player: Player = game_state.find_player(player_id)
+        self.player: Player = game_state.find_player(self.app.get_identity())
 
         self.selected_cards: MutableSet[Card] = set()
         self.hints: MutableSet[Card] = set()

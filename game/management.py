@@ -36,23 +36,24 @@ class LocalGameManager(GameManager):
         self.round_missed_sets: defaultdict[str,list[set]] = defaultdict(list)
     
     def handle_action(self, action: Action, timestamp=None) -> list[Event]:
-        if timestamp is None or not self.events or self.events[-1].timestamp < timestamp:
-            if timestamp is None:
-                timestamp = time()
-            events = []
-            if action.atype is ActionType.CALL_EMPTY:
-                event = self.handle_call_empty(action, timestamp)
-                if event:
-                    events.append(event)
-            if action.atype is ActionType.CALL_SET:
-                event = self.handle_call_set(action, timestamp)
-                if event:
-                    events.append(event)
-            if len(events) > 0:
-                event = events[0]
-                self.events.append(event)
-                self.game_state.process_event(event)
-            return events
+        if not self.game_state.game_over:
+            if timestamp is None or not self.events or self.events[-1].timestamp < timestamp:
+                if timestamp is None:
+                    timestamp = time()
+                events = []
+                if action.atype is ActionType.CALL_EMPTY:
+                    event = self.handle_call_empty(action, timestamp)
+                    if event:
+                        events.append(event)
+                if action.atype is ActionType.CALL_SET:
+                    event = self.handle_call_set(action, timestamp)
+                    if event:
+                        events.append(event)
+                if len(events) > 0:
+                    event = events[0]
+                    self.events.append(event)
+                    self.game_state.process_event(event)
+                return events
         return self.get_events(action)
     
     def handle_call_set(self, action: Action, timestamp: int) -> Event:
@@ -73,7 +74,7 @@ class LocalGameManager(GameManager):
             while not working_game_state.is_set_showing():
                 new_cards = self.deck.draw_cards(working_game_state.field)
                 if len(new_cards) == 0:
-                    return self.game_over_event(action)
+                    return self.game_over_event(action, timestamp)
                 working_game_state.field.extend(new_cards)
                 drawn_cards.extend(new_cards)
             return self.valid_set_event(action, timestamp, replacement_cards, drawn_cards)
