@@ -5,10 +5,9 @@ from game.game_state import GameState
 from widgets.game_stats_display import GameStatsDisplay, GameStatsWidget
 
 
-class SPStatsDisplay(GameStatsDisplay):
-    def __init__(self, player: Player, rules: Rules):
+class MPStatsDisplay(GameStatsDisplay):
+    def __init__(self, players: list[Player], rules: Rules):
         super().__init__(orientation='horizontal', height='64dp', size_hint_y=None)
-        self.player: Player = player
         if rules.count_misses():
             self.add_widget(ScoreDisplay())
         self.add_widget(SetsFoundDisplay())
@@ -21,10 +20,6 @@ class SPStatsDisplay(GameStatsDisplay):
             self.add_widget(misses_display)
         if not rules.endless_mode:
             self.add_widget(RemainingDealsDisplay())
-
-    def update_game_stats(self, game_state: GameState):
-        for child in self.children:
-            child.update_stats(game_state, self.player)
 
 class ScoreDisplay(Label, GameStatsWidget):
     def update_stats(self, game_state: GameState, player: Player):

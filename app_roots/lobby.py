@@ -83,7 +83,7 @@ class Lobby(BoxLayout):
         game_state = GameState.from_json(game_state_data)
         rules_data = response_data[RULES_KEY]
         rules = Rules.from_json(rules_data)
-        self.app.start_mp_game(self.lobby_state.id, game_state, rules)
+        self.app.start_mp_game(self.lobby_state.id, self.lobby_state.name(), game_state, rules)
 
     def host(self) -> Identity:
         return self.lobby_state.host

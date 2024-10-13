@@ -93,8 +93,8 @@ class SetApp(App):
         rules = self.make_rules(GameMode.SINGLE_PLAYER)
         self.switch_root(SPGame(rules))
 
-    def start_mp_game(self, game_id: str, game_state: GameState, rules: Rules):
-        self.switch_root(MPGame(game_id, game_state, rules))
+    def start_mp_game(self, game_id: str, name: str, game_state: GameState, rules: Rules):
+        self.switch_root(MPGame(game_id, name, game_state, rules))
 
     def open_lobbies(self, lobbies: dict[str, LobbyState]):
         self.switch_root(Lobbies(lobbies))

@@ -14,9 +14,10 @@ from game.globals import *
 Builder.load_file('widgets/sp/gameover_popup.kv')
 
 class MPGame(SetGame):
-    def __init__(self, game_id: str, game_state: GameState, rules: Rules):
+    def __init__(self, game_id: str, name: str, game_state: GameState, rules: Rules):
         manager = RemoteGameManager(game_id)
         super().__init__(manager, game_state, rules)
+        self.name = name
 
     def refresh(self):
         pass
@@ -27,8 +28,8 @@ class MPGame(SetGame):
     def quit(self):
         self.app.go_home()
 
-    def title(self):
-        return "Solitaire"
+    def title(self) -> str:
+        return self.name
     
     def game_over(self):
         GameOverPopup().open()
